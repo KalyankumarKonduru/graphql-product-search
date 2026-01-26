@@ -2,7 +2,6 @@ package model
 
 import "time"
 
-// Product represents a product in the catalog
 type Product struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
@@ -17,7 +16,6 @@ type Product struct {
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-// Category represents a product category
 type Category struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
@@ -25,7 +23,6 @@ type Category struct {
 	ProductCount int    `json:"productCount"`
 }
 
-// Review represents a product review
 type Review struct {
 	ID        string    `json:"id"`
 	ProductID string    `json:"productId"`
@@ -36,52 +33,41 @@ type Review struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-// PageInfo for cursor-based pagination
 type PageInfo struct {
 	HasNextPage     bool    `json:"hasNextPage"`
 	HasPreviousPage bool    `json:"hasPreviousPage"`
-	StartCursor     *string `json:"startCursor"`
-	EndCursor       *string `json:"endCursor"`
+	StartCursor     *string `json:"startCursor,omitempty"`
+	EndCursor       *string `json:"endCursor,omitempty"`
 	TotalCount      int     `json:"totalCount"`
 }
 
-// ProductEdge for connection pattern
 type ProductEdge struct {
 	Cursor string   `json:"cursor"`
 	Node   *Product `json:"node"`
 }
 
-// ProductConnection for paginated products
 type ProductConnection struct {
 	Edges    []*ProductEdge `json:"edges"`
 	PageInfo *PageInfo      `json:"pageInfo"`
 }
 
-// ReviewEdge for connection pattern
 type ReviewEdge struct {
 	Cursor string  `json:"cursor"`
 	Node   *Review `json:"node"`
 }
 
-// ReviewConnection for paginated reviews
 type ReviewConnection struct {
 	Edges    []*ReviewEdge `json:"edges"`
 	PageInfo *PageInfo     `json:"pageInfo"`
 }
 
-// Filter and sort inputs
 type ProductFilterInput struct {
-	Search     *string  `json:"search"`
-	CategoryID *string  `json:"categoryId"`
-	MinPrice   *float64 `json:"minPrice"`
-	MaxPrice   *float64 `json:"maxPrice"`
-	MinRating  *float64 `json:"minRating"`
-	InStock    *bool    `json:"inStock"`
-}
-
-type ProductSortInput struct {
-	Field ProductSortField `json:"field"`
-	Order SortOrder        `json:"order"`
+	Search     *string  `json:"search,omitempty"`
+	CategoryID *string  `json:"categoryId,omitempty"`
+	MinPrice   *float64 `json:"minPrice,omitempty"`
+	MaxPrice   *float64 `json:"maxPrice,omitempty"`
+	MinRating  *float64 `json:"minRating,omitempty"`
+	InStock    *bool    `json:"inStock,omitempty"`
 }
 
 type ProductSortField string
@@ -93,6 +79,18 @@ const (
 	ProductSortFieldCreatedAt ProductSortField = "CREATED_AT"
 )
 
+func (e ProductSortField) IsValid() bool {
+	switch e {
+	case ProductSortFieldName, ProductSortFieldPrice, ProductSortFieldRating, ProductSortFieldCreatedAt:
+		return true
+	}
+	return false
+}
+
+func (e ProductSortField) String() string {
+	return string(e)
+}
+
 type SortOrder string
 
 const (
@@ -100,7 +98,23 @@ const (
 	SortOrderDesc SortOrder = "DESC"
 )
 
-// Mutation inputs
+func (e SortOrder) IsValid() bool {
+	switch e {
+	case SortOrderAsc, SortOrderDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortOrder) String() string {
+	return string(e)
+}
+
+type ProductSortInput struct {
+	Field ProductSortField `json:"field"`
+	Order SortOrder        `json:"order"`
+}
+
 type CreateProductInput struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
@@ -111,12 +125,12 @@ type CreateProductInput struct {
 }
 
 type UpdateProductInput struct {
-	Name        *string  `json:"name"`
-	Description *string  `json:"description"`
-	Price       *float64 `json:"price"`
-	CategoryID  *string  `json:"categoryId"`
-	ImageURL    *string  `json:"imageUrl"`
-	Stock       *int     `json:"stock"`
+	Name        *string  `json:"name,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Price       *float64 `json:"price,omitempty"`
+	CategoryID  *string  `json:"categoryId,omitempty"`
+	ImageURL    *string  `json:"imageUrl,omitempty"`
+	Stock       *int     `json:"stock,omitempty"`
 }
 
 type CreateReviewInput struct {

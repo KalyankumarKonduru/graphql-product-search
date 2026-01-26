@@ -1,9 +1,4 @@
-# GraphQL Schema for Product Search API
-# Demonstrates: Queries, Mutations, Pagination, Filtering, Custom Scalars
-
 scalar DateTime
-
-# ============== TYPES ==============
 
 type Product {
   id: ID!
@@ -36,8 +31,6 @@ type Review {
   createdAt: DateTime!
 }
 
-# ============== PAGINATION (Cursor-based) ==============
-
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -65,8 +58,6 @@ type ReviewConnection {
   edges: [ReviewEdge!]!
   pageInfo: PageInfo!
 }
-
-# ============== INPUTS ==============
 
 input ProductFilterInput {
   search: String
@@ -118,13 +109,8 @@ input CreateReviewInput {
   comment: String!
 }
 
-# ============== QUERIES ==============
-
 type Query {
-  # Single product by ID
   product(id: ID!): Product
-
-  # Paginated product search with filtering and sorting
   products(
     first: Int
     after: String
@@ -133,43 +119,21 @@ type Query {
     filter: ProductFilterInput
     sort: ProductSortInput
   ): ProductConnection!
-
-  # Get all categories
   categories: [Category!]!
-
-  # Get category by ID
   category(id: ID!): Category
-
-  # Get reviews for a product
-  reviews(
-    productId: ID!
-    first: Int
-    after: String
-  ): ReviewConnection!
-
-  # Search suggestions (for autocomplete)
+  reviews(productId: ID!, first: Int, after: String): ReviewConnection!
   searchSuggestions(query: String!, limit: Int): [String!]!
 }
 
-# ============== MUTATIONS ==============
-
 type Mutation {
-  # Product mutations
   createProduct(input: CreateProductInput!): Product!
   updateProduct(id: ID!, input: UpdateProductInput!): Product!
   deleteProduct(id: ID!): Boolean!
-
-  # Review mutations
   createReview(input: CreateReviewInput!): Review!
   deleteReview(id: ID!): Boolean!
 }
 
-# ============== SUBSCRIPTIONS ==============
-
 type Subscription {
-  # Real-time product updates
   productUpdated(id: ID!): Product!
-
-  # New review notifications
   reviewAdded(productId: ID!): Review!
 }

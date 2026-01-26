@@ -1,81 +1,30 @@
 # GraphQL Product Search
 
-A full-stack GraphQL application with **Go (gqlgen)** backend and **React (Apollo Client)** frontend. Features real-time search, cursor-based pagination, and optimistic UI updates.
+Full-stack GraphQL application with **Go (gqlgen)** backend and **React (Apollo Client)** frontend.
 
-![Go](https://img.shields.io/badge/Go-1.22-00ADD8?style=flat-square&logo=go)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript)
-![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=flat-square&logo=graphql)
-![Apollo](https://img.shields.io/badge/Apollo_Client-311C87?style=flat-square&logo=apollographql)
+## Quick Start
 
-## 🎯 Features
-
-### Backend (Go + gqlgen)
-- GraphQL API with type-safe resolvers
-- Cursor-based pagination (Relay-style)
-- Full-text search with filtering
-- CORS-enabled for frontend
-
-### Frontend (React + Apollo Client)
-- Debounced search with autocomplete
-- Infinite scroll pagination
-- Normalized caching
-- Optimistic UI updates
-- Error boundaries
-- Web Vitals monitoring
-- MSW for testing
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────┐
-│         React Frontend              │
-│  ┌───────────────────────────────┐  │
-│  │      Apollo Client            │  │
-│  │  • Normalized Cache           │  │
-│  │  • Optimistic Updates         │  │
-│  │  • Error Handling             │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
-                │
-                │ GraphQL (HTTP)
-                ▼
-┌─────────────────────────────────────┐
-│         Go Backend                  │
-│  ┌───────────────────────────────┐  │
-│  │         gqlgen                │  │
-│  │  • Schema-first              │  │
-│  │  • Type-safe resolvers       │  │
-│  │  • Code generation           │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Go 1.22+
-- Node.js 18+
-- npm or yarn
-
-### Backend
+### 1. Start Backend
 
 ```bash
 cd backend
 
 # Download dependencies
-go mod download
+go mod tidy
 
 # Generate GraphQL code
 go run github.com/99designs/gqlgen generate
 
-# Run server
+# IMPORTANT: After generate, open graph/schema.resolvers.go
+# and replace the panic() lines with the implementations from README.md
+
+# Run the server
 go run server.go
 ```
 
-Server runs at `http://localhost:4000` with GraphQL Playground.
+Backend runs at: **http://localhost:4000**
 
-### Frontend
+### 2. Start Frontend
 
 ```bash
 cd frontend
@@ -83,155 +32,51 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start dev server
+# Run dev server
 npm run dev
 ```
 
-Frontend runs at `http://localhost:5173`.
+Frontend runs at: **http://localhost:5173**
 
-## 📊 GraphQL Schema
+## Test the API
 
-### Queries
+Open http://localhost:4000 and run:
 
 ```graphql
-# Search products with pagination
-query SearchProducts($search: String!, $first: Int!, $after: String) {
-  products(
-    first: $first
-    after: $after
-    filter: { search: $search }
-    sort: { field: RATING, order: DESC }
-  ) {
+query {
+  products(first: 5) {
     edges {
-      cursor
       node {
         id
         name
         price
         rating
-        category { name }
+        category {
+          name
+        }
       }
     }
     pageInfo {
       hasNextPage
-      endCursor
       totalCount
     }
   }
 }
-
-# Autocomplete suggestions
-query Suggestions($query: String!) {
-  searchSuggestions(query: $query, limit: 5)
-}
 ```
 
-### Mutations
+## Features
 
-```graphql
-mutation CreateReview($input: CreateReviewInput!) {
-  createReview(input: $input) {
-    id
-    rating
-    comment
-  }
-}
-```
+- **GraphQL API** with cursor-based pagination
+- **Full-text search** with debouncing
+- **Category filtering** and sorting
+- **Infinite scroll** with Apollo Client cache merging
+- **Responsive UI** with Tailwind CSS
 
-## 🧪 Testing
+## Tech Stack
 
-### Frontend Tests (with MSW)
-
-```bash
-cd frontend
-npm test
-npm run test:coverage
-```
-
-Tests use Mock Service Worker to mock GraphQL:
-
-```typescript
-graphql.query('GetProducts', ({ variables }) => {
-  return HttpResponse.json({
-    data: { products: filteredProducts },
-  });
-});
-```
-
-## 📁 Project Structure
-
-```
-graphql-product-search/
-├── backend/
-│   ├── graph/
-│   │   ├── schema.graphqls   # GraphQL schema
-│   │   ├── resolver.go       # Query/Mutation resolvers
-│   │   └── model/            # Data models
-│   ├── internal/
-│   │   └── database/         # In-memory database
-│   ├── server.go             # Entry point
-│   └── go.mod
-│
-└── frontend/
-    ├── src/
-    │   ├── components/       # React components
-    │   ├── graphql/          # Queries, mutations, types
-    │   ├── hooks/            # Custom hooks
-    │   ├── lib/              # Apollo client config
-    │   └── __mocks__/        # MSW handlers
-    └── package.json
-```
-
-## 🔧 Key Implementation Details
-
-### Apollo Client Cache
-
-```typescript
-const cache = new InMemoryCache({
-  typePolicies: {
-    Query: {
-      fields: {
-        products: {
-          keyArgs: ['filter', 'sort'],
-          merge(existing, incoming, { args }) {
-            if (!args?.after) return incoming;
-            return {
-              ...incoming,
-              edges: [...existing.edges, ...incoming.edges],
-            };
-          },
-        },
-      },
-    },
-  },
-});
-```
-
-### gqlgen Resolver
-
-```go
-func (r *queryResolver) Products(
-  ctx context.Context,
-  first *int,
-  after *string,
-  filter *model.ProductFilterInput,
-  sort *model.ProductSortInput,
-) (*model.ProductConnection, error) {
-  return database.DB.GetProducts(filter, sort, first, after, nil, nil), nil
-}
-```
-
-## 📈 Performance
-
-- **Debounced Search**: 300ms delay to reduce API calls
-- **Cursor Pagination**: Efficient database queries
-- **Normalized Cache**: Prevents duplicate data
-- **Web Vitals**: LCP, FID, CLS monitoring
-
-## 👤 Author
-
-**Kalyankumar Konduru**
-
-## 📄 License
-
-MIT
+| Layer | Technology |
+|-------|------------|
+| Backend | Go, gqlgen, Chi router |
+| Frontend | React, TypeScript, Apollo Client |
+| Styling | Tailwind CSS |
+| Icons | Lucide React |

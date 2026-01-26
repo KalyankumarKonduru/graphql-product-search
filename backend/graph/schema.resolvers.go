@@ -1,26 +1,3 @@
-# GraphQL Product Search - Go Backend
-
-## Quick Start
-
-```bash
-# 1. Download dependencies
-go mod tidy
-
-# 2. Generate GraphQL code
-go run github.com/99designs/gqlgen generate
-
-# 3. Run the server
-go run server.go
-```
-
-Server runs at http://localhost:4000
-
-## After Running `gqlgen generate`
-
-The command creates `graph/schema.resolvers.go` with TODO placeholders.
-Replace the contents with the implementation below:
-
-```go
 package graph
 
 import (
@@ -92,39 +69,12 @@ func (r *subscriptionResolver) ReviewAdded(ctx context.Context, productID string
 	return ch, nil
 }
 
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
-func (r *Resolver) Product() ProductResolver { return &productResolver{r} }
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+func (r *Resolver) Mutation() MutationResolver         { return &mutationResolver{r} }
+func (r *Resolver) Product() ProductResolver           { return &productResolver{r} }
+func (r *Resolver) Query() QueryResolver               { return &queryResolver{r} }
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
-```
-
-## Test Query
-
-Open http://localhost:4000 and run:
-
-```graphql
-query {
-  products(first: 5) {
-    edges {
-      node {
-        id
-        name
-        price
-        rating
-        category {
-          name
-        }
-      }
-    }
-    pageInfo {
-      hasNextPage
-      totalCount
-    }
-  }
-}
-```

@@ -1,0 +1,41 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+backend/server
+*.exe
+*.test
+*.out
+*.prof
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+
+# TLS certificates
+*.pem
+*.key
+*.crt
+
+# Coverage
+coverage/
+*.coverprofile

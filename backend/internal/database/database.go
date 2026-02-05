@@ -187,11 +187,21 @@ func (db *Database) paginateProducts(products []*model.Product, first *int, afte
 	}
 	products = products[startIdx:endIdx]
 
+	hasNextPage := false
+	hasPreviousPage := startIdx > 0
+
 	if first != nil && *first < len(products) {
 		products = products[:*first]
+		hasNextPage = true
 	}
 	if last != nil && *last < len(products) {
 		products = products[len(products)-*last:]
+		hasPreviousPage = true
+	}
+
+	// Also check if there are items beyond the endIdx (from before cursor)
+	if endIdx < totalCount {
+		hasNextPage = true
 	}
 
 	edges := make([]*model.ProductEdge, len(products))
@@ -211,8 +221,8 @@ func (db *Database) paginateProducts(products []*model.Product, first *int, afte
 	return &model.ProductConnection{
 		Edges: edges,
 		PageInfo: &model.PageInfo{
-			HasNextPage:     endIdx < totalCount,
-			HasPreviousPage: startIdx > 0,
+			HasNextPage:     hasNextPage,
+			HasPreviousPage: hasPreviousPage,
 			StartCursor:     startCursor,
 			EndCursor:       endCursor,
 			TotalCount:      totalCount,
